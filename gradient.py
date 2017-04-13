@@ -1,10 +1,10 @@
-# Simple stochastic gradient descent
+# Simple stochastic gradient descent for linear regression
 # Dataset from http://archive.ics.uci.edu/ml/datasets/Wine+Quality
 
+import time
 from math import sqrt
 from csv import reader
 from random import seed, randrange
-import time
 
 
 def load_csv(filename):
@@ -81,11 +81,11 @@ def evaluate_algorithm(dataset, algorithm, n_folds, *args):
             row_copy = list(row)
             test_set.append(row_copy)
             row_copy[-1] = None
-        predicted = algorithm(train_set, test_set, *args)
+        predicted, coefs = algorithm(train_set, test_set, *args)
         actual = [row[-1] for row in fold]
         rmse = rmse_metric(actual, predicted)
         scores.append(rmse)
-    return scores, predicted
+    return scores, predicted, coefs
 
 
 # Make a prediction with coefficients
@@ -116,7 +116,7 @@ def linear_regression_sgd(train, test, l_rate, n_epoch):
     for row in test:
         yhat = predict(row, coef)
         predictions.append(yhat)
-    return(predictions)
+    return predictions, coef
 
 
 if __name__ == "__main__":
@@ -134,6 +134,8 @@ if __name__ == "__main__":
     l_rate = 0.01
     n_epoch = 30
     # result is predicted coefficients
-    scores, predicted = evaluate_algorithm(dataset, linear_regression_sgd, n_folds, l_rate, n_epoch)
+    scores, predicted, coefs = evaluate_algorithm(dataset, linear_regression_sgd, n_folds, l_rate, n_epoch)
+
     print('Scores: %s' % scores)
+    print('Computed coefficients: %s' % coefs)
     print('Mean RMSE: %.3f' % (sum(scores) / float(len(scores))))
